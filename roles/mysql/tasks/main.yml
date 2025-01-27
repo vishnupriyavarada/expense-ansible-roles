@@ -1,37 +1,37 @@
-- name : Configure mysql
-  hosts : mysql
-  become : yes
-  tasks :
-    - name : task1 - Install mysql libraries
+- name: Configure mysql
+  hosts: mysql
+  become: yes
+  tasks:
+    - name: task1 - Install mysql libraries
       ansible.builtin.pip:
-        name : "{{ item }}" 
+        name: "{{ item }}" 
         executable: pip3.9
       loop:
       - PyMySQL # This is a library for Python (Ansible uses python) to connect to mysql
       - cryptography
-    - name : task1 - Install mysql
-      ansible.builtin.package :
-        name : mysql-server
-        state : installed   
+    - name: task1 - Install mysql
+      ansible.builtin.package:
+        name: mysql-server
+        state: installed   
 
-    - name : task2 - Start  and enable mysql service
-      ansible.builtin.service :
-        name : mysqld
-        state : started
+    - name: task2 - Start  and enable mysql service
+      ansible.builtin.service:
+        name: mysqld
+        state: started
         enabled: yes
     
-    - name : task3 - Conect to mysql server by setting root password
+    - name: task3 - Conect to mysql server by setting root password
       community.mysql.mysql_info:
-        login_user : root
-        login_password : "{{ mysql_root_password }}"
-        login_host : mysql.vishnudevopsaws.online
-      register : mysql_info # In Ansible, the register module captures the output of tasks and commands and stores it in a variable. 
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        login_host: mysql.vishnudevopsaws.online
+      register: mysql_info # In Ansible, the register module captures the output of tasks and commands and stores it in a variable. 
       ignore_errors: true
 
-    - name : print the output
+    - name: print the output
       ansible.builtin.debug:
         msg: " My SQL Info {{ mysql_info }} "
     
-    - name : setup root password 
+    - name: setup root password 
       ansible.builtin.command: "mysql_secure_installation --set-root-pass {{ mysql_root_password }}"
-      when : mysql_info.failed is true
+      when: mysql_info.failed is true
