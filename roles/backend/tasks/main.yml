@@ -40,7 +40,7 @@
   #ansible.builtin.copy:   - copy module will not work. by default copy module will look for the file in files folder.
   # you can use copy module when  there are no variables in your backend.service file. you can create a files folder and put backend.service there.
   ansible.builtin.template: #it will search in templates folder
-    src: backend.service.j2 # given .j2 for reference to understand that there are variables in that file 
+    src: backend.service.j2 # given .j2 for reference to understand that there are variables in that file. j2 - jinja2
     dest: /etc/systemd/system
 
 - name: Install python module for mysql
