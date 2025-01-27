@@ -1,0 +1,71 @@
+- name : disable current version of nodejs
+  ansible.builtin.command: dnf module disable nodejs -y
+
+- name : enable nodejs 20
+  ansible.builtin.command: dnf module enable nodejs:20 -y
+
+- name : install nodejs
+  ansible.builtin.package:
+    name : "{{ item }}"
+    state: present  # installed will be used for dnf module. for package it is present/absent
+  loop:
+    - nodejs
+    - mysql
+
+- name: create expense user
+  ansible.builtin.user:
+    name: expense
+
+- name: create app directory
+  ansible.builtin.file:
+    path: /app
+    state: directory
+
+- name: download backend code
+  ansible.builtin.get_url:
+    url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+    dest: /tmp/backend.zip
+
+- name: unzip backend code
+  ansible.builtin.unarchive:
+    src: /tmp/backend.zip
+    dest: /app
+    remote_src: yes  # Unarchive a file that is already on the remote machine.Here remote machine is backend server.
+
+- name: install app dependencies - npm # install package manager
+  community.general.npm:
+    path: /app # in this location we have package.json. This module will go to this location, read the package.json and will install the dependencies
+
+- name: copy backend.service to /etc/systemd/system
+  ansible.builtin.copy:
+    src: backend.service
+    dest: /etc/systemd/system
+
+- name: Install python module for mysql
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    executable: pip3.9
+  loop:
+    - PyMySQL
+    - cryptography
+    
+- name: Import mysql data
+  community.mysql.mysql_db:
+    state: import
+    name: all
+    login_user: "{{ MYSQL_USER }}"
+    login_password: " {{ MYSQL_PASSWORD }}"
+    login_host: "{{ MYSQL_HOST }}" #172.31.83.208
+    target: /app/schema/backend.sql
+
+- name: systemd daemon reload and restart service
+  ansible.builtin.systemd_service:        
+    enabled: true
+    state: restarted
+    daemon_reload: true        
+    name: backend
+
+- name: start thes service
+  ansible.builtin.service:
+    name: backend
+    state: started
