@@ -23,7 +23,7 @@
     - name : task3 - Conect to mysql server by setting root password
       community.mysql.mysql_info:
         login_user : root
-        login_password : {{ mysql_root_password }}
+        login_password : "{{ mysql_root_password }}"
         login_host : mysql.vishnudevopsaws.online
       register : mysql_info # In Ansible, the register module captures the output of tasks and commands and stores it in a variable. 
       ignore_errors: true
