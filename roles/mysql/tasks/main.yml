@@ -5,7 +5,7 @@
   loop:
   - PyMySQL # This is a library for Python (Ansible uses python) to connect to mysql
   - cryptography
-- name: task1 - Install mysql
+- name: task1 - Install MySQL Server
   ansible.builtin.package:
     name: mysql-server
     state: installed   
